@@ -1,9 +1,43 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    FlatList,
+    Alert,
+} from "react-native";
+import { Participant } from "../../components/Participant";
 import { styles } from './styles';
 
 export function Home() {
+    const [participants, setParticipants] = useState<string[]>([])
+    const [participantName, setParticipantName] = useState('')
+
     function handleParticipantAdd() {
-        console.log('Boa');
+        if (participants.includes(participantName)) {
+            return Alert.alert('Participante já existe',
+                'Ja existe um participante com esse nome na lista!')
+        }
+
+        setParticipants(preveState => [...preveState, participantName])
+        setParticipantName('')
+    }
+
+    function handleParticipantRemove(name: string) {
+        Alert.alert('Remover',
+            `Remover o participante ${name}?`, [
+            {
+                text: 'Sim', onPress: () => setParticipants(prevState =>
+                    prevState.filter(
+                        participant => participant !== name))
+            },
+
+            {
+                text: 'Não',
+                style: 'cancel'
+            }
+        ])
     }
 
     return (
@@ -13,14 +47,17 @@ export function Home() {
             </Text>
 
             <Text style={styles.eventDate}>
-                sexta, 4 de Novembro de 2022.
+                terça, 18 de Outubro de 2022.
             </Text>
 
             <View style={styles.form}>
                 <TextInput
                     style={styles.input}
-                    placeholder='nome do participante'
-                    placeholderTextColor='#fff' />
+                    placeholder='Nome do participante'
+                    placeholderTextColor='#6B6B6B'
+                    onChangeText={setParticipantName}
+                    value={participantName}
+                />
 
                 <TouchableOpacity
                     style={styles.button}
@@ -30,6 +67,24 @@ export function Home() {
                     </Text>
                 </TouchableOpacity>
             </View>
+
+            <FlatList
+                data={participants}
+                keyExtractor={item => item}
+                renderItem={({ item }) => (
+                    <Participant
+                        key={item}
+                        name={item}
+                        onRemove={() => handleParticipantRemove(item)}
+                    />
+                )}
+                showsHorizontalScrollIndicator={false}
+                ListEmptyComponent={() => (
+                    <Text style={styles.listEmptyText}>
+                        Lista vazia, adicione participantes ao evento.
+                    </Text>
+                )}
+            />
         </View>
     )
 }
